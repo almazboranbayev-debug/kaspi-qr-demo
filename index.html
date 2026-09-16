@@ -36,20 +36,21 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; back
 .scan-hint { color: #fff; margin-top: 32px; font-size: 15px; opacity: 0.9; position: relative; z-index: 10; text-shadow: 0 1px 4px rgba(0,0,0,0.8); }
 .bottom-actions { padding: 24px 20px 40px; background: var(--card); display: flex; flex-direction: column; gap: 12px; }
 .merchant-info { display: flex; align-items: center; gap: 14px; padding: 20px; background: var(--card); margin: 12px 16px; border-radius: var(--radius); box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.merchant-info.compact { padding: 12px 16px; margin: 8px 16px; }
 .merchant-avatar { width: 52px; height: 52px; background: #FEE2E2; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 26px; }
+.merchant-info.compact .merchant-avatar { width: 40px; height: 40px; font-size: 20px; }
 .merchant-name { font-weight: 600; font-size: 16px; }
+.merchant-info.compact .merchant-name { font-size: 15px; }
 .merchant-id { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
-.amount-section { padding: 8px 20px 20px; }
-.amount-section label { font-size: 14px; color: var(--text-secondary); display: block; margin-bottom: 8px; }
-.amount-input-wrap { display: flex; align-items: baseline; gap: 8px; background: var(--card); border-radius: var(--radius); padding: 16px 20px; border: 2px solid var(--border); transition: border-color 0.2s; }
-.amount-input-wrap:focus-within { border-color: var(--kaspi-red); }
-#amount-input { flex: 1; border: none; outline: none; font-size: 36px; font-weight: 700; background: transparent; color: var(--text); width: 100%; }
-#amount-input::placeholder { color: #D1D5DB; }
-.currency { font-size: 28px; font-weight: 600; color: var(--text-secondary); }
-.quick-amounts { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
-.quick-amounts button { flex: 1; min-width: 70px; padding: 10px 8px; border: 1px solid var(--border); background: var(--card); border-radius: 12px; font-size: 13px; font-weight: 500; cursor: pointer; color: var(--text); }
-.quick-amounts button:active { background: #FEE2E2; border-color: var(--kaspi-red); color: var(--kaspi-red); }
+.amount-display { display: flex; align-items: baseline; justify-content: center; gap: 8px; padding: 20px 16px 12px; }
+.amount-value { font-size: 48px; font-weight: 700; color: var(--text); min-height: 58px; line-height: 1.1; }
+.currency-big { font-size: 32px; font-weight: 600; color: var(--text-secondary); }
 .payment-source { padding: 0 16px; }
+.payment-source.compact { padding: 0 16px 8px; }
+.numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 8px 20px 12px; margin-top: auto; }
+.num-btn { height: 56px; border: none; background: var(--card); border-radius: 14px; font-size: 26px; font-weight: 500; color: var(--text); cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+.num-btn:active { background: #FEE2E2; color: var(--kaspi-red); transform: scale(0.96); }
+.num-btn.delete { font-size: 22px; color: var(--text-secondary); }
 .source-card { display: flex; align-items: center; gap: 12px; background: var(--card); padding: 14px 16px; border-radius: var(--radius); border: 2px solid var(--kaspi-red); }
 .card-icon { font-size: 24px; }
 .card-info { flex: 1; }
@@ -117,10 +118,23 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; back
     </div>
     <div id="screen-amount" class="screen">
       <div class="header"><button class="back-btn" onclick="backToScan()">←</button><h1>Оплата</h1><div class="header-right"></div></div>
-      <div class="merchant-info"><div class="merchant-avatar">🏪</div><div class="merchant-details"><div class="merchant-name" id="merchant-name">Coffee House Almaty</div><div class="merchant-id">Kaspi QR • ID 4829103</div></div></div>
-      <div class="amount-section"><label>Сумма к оплате</label><div class="amount-input-wrap"><input type="text" id="amount-input" inputmode="decimal" placeholder="0" value="" autocomplete="off"><span class="currency">₸</span></div>
-        <div class="quick-amounts"><button onclick="setAmount(500)">500 ₸</button><button onclick="setAmount(1000)">1 000 ₸</button><button onclick="setAmount(2000)">2 000 ₸</button><button onclick="setAmount(5000)">5 000 ₸</button></div></div>
-      <div class="payment-source"><div class="source-card"><div class="card-icon">💳</div><div class="card-info"><div class="card-name">Kaspi Gold</div><div class="card-balance">Баланс: 245 780 ₸</div></div><div class="card-check">✓</div></div></div>
+      <div class="merchant-info compact"><div class="merchant-avatar">🏪</div><div class="merchant-details"><div class="merchant-name" id="merchant-name">Coffee House Almaty</div><div class="merchant-id">Kaspi QR • ID 4829103</div></div></div>
+      <div class="amount-display"><div class="amount-value" id="amount-display">0</div><span class="currency-big">₸</span></div>
+      <div class="payment-source compact"><div class="source-card"><div class="card-icon">💳</div><div class="card-info"><div class="card-name">Kaspi Gold</div><div class="card-balance">245 780 ₸</div></div><div class="card-check">✓</div></div></div>
+      <div class="numpad">
+        <button class="num-btn" onclick="numPress('1')">1</button>
+        <button class="num-btn" onclick="numPress('2')">2</button>
+        <button class="num-btn" onclick="numPress('3')">3</button>
+        <button class="num-btn" onclick="numPress('4')">4</button>
+        <button class="num-btn" onclick="numPress('5')">5</button>
+        <button class="num-btn" onclick="numPress('6')">6</button>
+        <button class="num-btn" onclick="numPress('7')">7</button>
+        <button class="num-btn" onclick="numPress('8')">8</button>
+        <button class="num-btn" onclick="numPress('9')">9</button>
+        <button class="num-btn" onclick="numPress('000')">000</button>
+        <button class="num-btn" onclick="numPress('0')">0</button>
+        <button class="num-btn delete" onclick="numDelete()">⌫</button>
+      </div>
       <div class="bottom-fixed"><button class="btn-primary" id="pay-btn" onclick="goToConfirm()" disabled>Продолжить</button></div>
     </div>
     <div id="screen-confirm" class="screen">
@@ -144,18 +158,19 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; back
 const merchants = [{ name: "Coffee House Almaty", id: "4829103" },{ name: "Magnum Cash & Carry", id: "1192847" },{ name: "Sulpak Electronics", id: "3382910" },{ name: "KFC Dostyk Plaza", id: "5510293" },{ name: "Аптека №47", id: "7740128" },{ name: "Starbucks Mega", id: "8821934" },{ name: "Zara Dostyk Plaza", id: "2291045" }];
 let currentAmount = 0; let currentMerchant = merchants[0]; let html5QrCode = null; let isScanning = false;
 function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
-function goHome() { stopCamera(); document.getElementById('amount-input').value = ''; currentAmount = 0; updatePayButton(); showScreen('screen-scan'); document.getElementById('scan-hint').textContent = 'Наведите камеру на QR-код продавца'; }
+function goHome() { stopCamera(); resetAmount(); showScreen('screen-scan'); document.getElementById('scan-hint').textContent = 'Наведите камеру на QR-код продавца'; }
 function backToScan() { stopCamera(); showScreen('screen-scan'); }
-function onScanSuccess(decodedText) { stopCamera(); currentMerchant = merchants[Math.floor(Math.random() * merchants.length)]; document.getElementById('merchant-name').textContent = currentMerchant.name; document.getElementById('confirm-merchant-name').textContent = currentMerchant.name; document.getElementById('success-merchant').textContent = currentMerchant.name; const frame = document.querySelector('.scanner-frame'); if (frame) frame.style.boxShadow = '0 0 0 4px rgba(34, 197, 94, 0.6)'; setTimeout(() => { if (frame) frame.style.boxShadow = ''; showScreen('screen-amount'); document.getElementById('amount-input').focus(); }, 300); }
+function onScanSuccess(decodedText) { stopCamera(); currentMerchant = merchants[Math.floor(Math.random() * merchants.length)]; document.getElementById('merchant-name').textContent = currentMerchant.name; document.getElementById('confirm-merchant-name').textContent = currentMerchant.name; document.getElementById('success-merchant').textContent = currentMerchant.name; const frame = document.querySelector('.scanner-frame'); if (frame) frame.style.boxShadow = '0 0 0 4px rgba(34, 197, 94, 0.6)'; setTimeout(() => { if (frame) frame.style.boxShadow = ''; resetAmount(); showScreen('screen-amount'); }, 300); }
 function startCamera() { if (isScanning) return; const btn = document.getElementById('start-camera-btn'); btn.textContent = 'Запуск камеры...'; btn.disabled = true; html5QrCode = new Html5Qrcode("reader"); html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 240, height: 240 }, aspectRatio: 1.0 }, onScanSuccess, () => {}).then(() => { isScanning = true; btn.innerHTML = '<span class="icon">📷</span> Камера включена'; btn.disabled = true; document.getElementById('scan-hint').textContent = 'Наведите на QR-код...'; }).catch((err) => { console.error(err); btn.innerHTML = '<span class="icon">📷</span> Включить камеру'; btn.disabled = false; document.getElementById('scan-hint').textContent = 'Нет доступа к камере. Используйте симуляцию.'; alert('Не удалось получить доступ к камере. Разрешите доступ или используйте «Симулировать».'); }); }
 function stopCamera() { if (html5QrCode && isScanning) { html5QrCode.stop().then(() => { html5QrCode.clear(); isScanning = false; const btn = document.getElementById('start-camera-btn'); if (btn) { btn.innerHTML = '<span class="icon">📷</span> Включить камеру'; btn.disabled = false; } }).catch(() => { isScanning = false; }); } }
-function simulateScan() { stopCamera(); currentMerchant = merchants[Math.floor(Math.random() * merchants.length)]; document.getElementById('merchant-name').textContent = currentMerchant.name; document.getElementById('confirm-merchant-name').textContent = currentMerchant.name; document.getElementById('success-merchant').textContent = currentMerchant.name; const frame = document.querySelector('.scanner-frame'); if (frame) frame.style.boxShadow = '0 0 0 4px rgba(227, 30, 36, 0.5)'; setTimeout(() => { if (frame) frame.style.boxShadow = ''; showScreen('screen-amount'); document.getElementById('amount-input').focus(); }, 400); }
+function simulateScan() { stopCamera(); currentMerchant = merchants[Math.floor(Math.random() * merchants.length)]; document.getElementById('merchant-name').textContent = currentMerchant.name; document.getElementById('confirm-merchant-name').textContent = currentMerchant.name; document.getElementById('success-merchant').textContent = currentMerchant.name; const frame = document.querySelector('.scanner-frame'); if (frame) frame.style.boxShadow = '0 0 0 4px rgba(227, 30, 36, 0.5)'; setTimeout(() => { if (frame) frame.style.boxShadow = ''; resetAmount(); showScreen('screen-amount'); }, 400); }
 function showMyQR() { stopCamera(); showScreen('screen-myqr'); }
-function setAmount(val) { document.getElementById('amount-input').value = val.toLocaleString('ru-RU'); currentAmount = val; updatePayButton(); }
 function formatNumber(num) { return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' '); }
-const amountInput = document.getElementById('amount-input');
-amountInput.addEventListener('input', (e) => { let raw = e.target.value.replace(/[^\d]/g, ''); if (raw === '') { e.target.value = ''; currentAmount = 0; } else { currentAmount = parseInt(raw, 10); e.target.value = formatNumber(currentAmount); } updatePayButton(); });
-function updatePayButton() { document.getElementById('pay-btn').disabled = currentAmount <= 0; }
+function updateAmountDisplay() { document.getElementById('amount-display').textContent = currentAmount === 0 ? '0' : formatNumber(currentAmount); updatePayButton(); }
+function resetAmount() { currentAmount = 0; updateAmountDisplay(); }
+function numPress(digit) { if (String(currentAmount).length >= 8) return; if (currentAmount === 0) currentAmount = parseInt(digit, 10); else currentAmount = parseInt(String(currentAmount) + digit, 10); updateAmountDisplay(); }
+function numDelete() { const str = String(currentAmount); if (str.length <= 1) currentAmount = 0; else currentAmount = parseInt(str.slice(0, -1), 10); updateAmountDisplay(); }
+function updatePayButton() { const btn = document.getElementById('pay-btn'); if (btn) btn.disabled = currentAmount <= 0; }
 function goToConfirm() { if (currentAmount <= 0) return; document.getElementById('confirm-amount').textContent = formatNumber(currentAmount) + ' ₸'; showScreen('screen-confirm'); }
 function processPayment() { const btn = document.querySelector('#screen-confirm .btn-primary'); const originalText = btn.textContent; btn.textContent = 'Обработка...'; btn.disabled = true; setTimeout(() => { document.getElementById('success-amount').textContent = formatNumber(currentAmount) + ' ₸'; const now = new Date(); document.getElementById('success-time').textContent = now.toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }); document.getElementById('op-number').textContent = 'KS-' + Math.floor(10000000 + Math.random() * 90000000); btn.textContent = originalText; btn.disabled = false; showScreen('screen-success'); }, 900); }
 function showReceipt() { alert('Чек отправлен\n\nОперация: ' + document.getElementById('op-number').textContent + '\nСумма: ' + formatNumber(currentAmount) + ' ₸\nПолучатель: ' + currentMerchant.name); }
