@@ -7,10 +7,160 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <style>
-/* placeholder - will use create_or_update */
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+:root { --kaspi-red: #E31E24; --kaspi-red-dark: #C41820; --bg: #F5F5F7; --card: #FFFFFF; --text: #1A1A1A; --text-secondary: #6B7280; --border: #E5E7EB; --success: #22C55E; --radius: 16px; }
+body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #1a1a1a; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; color: var(--text); }
+.phone-frame { width: 390px; height: 844px; background: var(--bg); border-radius: 40px; overflow: hidden; position: relative; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); border: 8px solid #111; }
+.status-bar { height: 44px; padding: 0 24px; display: flex; justify-content: space-between; align-items: center; background: var(--bg); font-size: 14px; font-weight: 600; position: absolute; top: 0; left: 0; right: 0; z-index: 100; }
+.status-icons { display: flex; gap: 6px; font-size: 12px; }
+.screen { display: none; flex-direction: column; height: 100%; padding-top: 44px; position: absolute; inset: 0; background: var(--bg); }
+.screen.active { display: flex; }
+.header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: var(--card); border-bottom: 1px solid var(--border); }
+.header h1 { font-size: 17px; font-weight: 600; }
+.back-btn { background: none; border: none; font-size: 22px; color: var(--kaspi-red); cursor: pointer; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+.back-btn:active { background: #FEE2E2; }
+.header-right { width: 40px; }
+.scanner-area { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #0f0f0f; position: relative; overflow: hidden; }
+.reader-box { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; }
+.reader-box video { object-fit: cover !important; width: 100% !important; height: 100% !important; }
+#reader__dashboard_section, #reader__dashboard_section_csr, #reader__status_span, #reader__header_message, #reader__camera_permission_button { display: none !important; }
+.scanner-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; z-index: 5; }
+.scanner-frame { width: 240px; height: 240px; position: relative; border-radius: 20px; }
+.corner { position: absolute; width: 36px; height: 36px; border-color: var(--kaspi-red); border-style: solid; }
+.corner.tl { top: 0; left: 0; border-width: 4px 0 0 4px; border-radius: 12px 0 0 0; }
+.corner.tr { top: 0; right: 0; border-width: 4px 4px 0 0; border-radius: 0 12px 0 0; }
+.corner.bl { bottom: 0; left: 0; border-width: 0 0 4px 4px; border-radius: 0 0 0 12px; }
+.corner.br { bottom: 0; right: 0; border-width: 0 4px 4px 0; border-radius: 0 0 12px 0; }
+.scan-line { position: absolute; top: 20px; left: 20px; right: 20px; height: 2px; background: linear-gradient(90deg, transparent, var(--kaspi-red), transparent); animation: scan 2s ease-in-out infinite; }
+@keyframes scan { 0%, 100% { top: 20px; opacity: 0.6; } 50% { top: 200px; opacity: 1; } }
+.scan-hint { color: #fff; margin-top: 32px; font-size: 15px; opacity: 0.9; position: relative; z-index: 10; text-shadow: 0 1px 4px rgba(0,0,0,0.8); }
+.bottom-actions { padding: 24px 20px 40px; background: var(--card); display: flex; flex-direction: column; gap: 12px; }
+.merchant-info { display: flex; align-items: center; gap: 14px; padding: 20px; background: var(--card); margin: 12px 16px; border-radius: var(--radius); box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.merchant-avatar { width: 52px; height: 52px; background: #FEE2E2; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 26px; }
+.merchant-name { font-weight: 600; font-size: 16px; }
+.merchant-id { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+.amount-section { padding: 8px 20px 20px; }
+.amount-section label { font-size: 14px; color: var(--text-secondary); display: block; margin-bottom: 8px; }
+.amount-input-wrap { display: flex; align-items: baseline; gap: 8px; background: var(--card); border-radius: var(--radius); padding: 16px 20px; border: 2px solid var(--border); transition: border-color 0.2s; }
+.amount-input-wrap:focus-within { border-color: var(--kaspi-red); }
+#amount-input { flex: 1; border: none; outline: none; font-size: 36px; font-weight: 700; background: transparent; color: var(--text); width: 100%; }
+#amount-input::placeholder { color: #D1D5DB; }
+.currency { font-size: 28px; font-weight: 600; color: var(--text-secondary); }
+.quick-amounts { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+.quick-amounts button { flex: 1; min-width: 70px; padding: 10px 8px; border: 1px solid var(--border); background: var(--card); border-radius: 12px; font-size: 13px; font-weight: 500; cursor: pointer; color: var(--text); }
+.quick-amounts button:active { background: #FEE2E2; border-color: var(--kaspi-red); color: var(--kaspi-red); }
+.payment-source { padding: 0 16px; }
+.source-card { display: flex; align-items: center; gap: 12px; background: var(--card); padding: 14px 16px; border-radius: var(--radius); border: 2px solid var(--kaspi-red); }
+.card-icon { font-size: 24px; }
+.card-info { flex: 1; }
+.card-name { font-weight: 600; font-size: 15px; }
+.card-balance { font-size: 13px; color: var(--text-secondary); }
+.card-check { width: 24px; height: 24px; background: var(--kaspi-red); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; }
+.bottom-fixed { margin-top: auto; padding: 16px 20px 36px; background: var(--card); border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; }
+.btn-primary { width: 100%; padding: 16px; background: var(--kaspi-red); color: white; border: none; border-radius: 14px; font-size: 17px; font-weight: 600; cursor: pointer; }
+.btn-primary:active { background: var(--kaspi-red-dark); }
+.btn-primary:disabled { background: #FCA5A5; cursor: not-allowed; }
+.btn-secondary { width: 100%; padding: 14px; background: #F3F4F6; color: var(--text); border: none; border-radius: 14px; font-size: 15px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.btn-secondary.outline { background: transparent; border: 1.5px solid var(--border); }
+.btn-link { background: none; border: none; color: var(--kaspi-red); font-size: 15px; font-weight: 500; cursor: pointer; padding: 8px; }
+.confirm-content { padding: 32px 20px; text-align: center; }
+.confirm-amount { font-size: 42px; font-weight: 700; margin-bottom: 24px; }
+.confirm-merchant { background: var(--card); padding: 16px; border-radius: var(--radius); margin-bottom: 16px; }
+.confirm-merchant span { display: block; font-size: 13px; color: var(--text-secondary); margin-bottom: 4px; }
+.confirm-merchant strong { font-size: 17px; }
+.confirm-details { background: var(--card); border-radius: var(--radius); padding: 8px 16px; }
+.detail-row { display: flex; justify-content: space-between; padding: 12px 0; font-size: 14px; border-bottom: 1px solid var(--border); }
+.detail-row:last-child { border-bottom: none; }
+.detail-row span:first-child { color: var(--text-secondary); }
+.free { color: var(--success); font-weight: 500; }
+.success-content { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center; }
+.success-icon { width: 80px; height: 80px; margin-bottom: 24px; animation: scaleIn 0.4s ease; }
+@keyframes scaleIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.success-content h2 { font-size: 22px; font-weight: 600; margin-bottom: 12px; }
+.success-amount { font-size: 36px; font-weight: 700; color: var(--success); margin-bottom: 8px; }
+.success-merchant { font-size: 16px; color: var(--text-secondary); margin-bottom: 4px; }
+.success-time { font-size: 13px; color: var(--text-secondary); margin-bottom: 28px; }
+.receipt-card { width: 100%; background: var(--card); border-radius: var(--radius); padding: 8px 16px; text-align: left; }
+.receipt-row { display: flex; justify-content: space-between; padding: 12px 0; font-size: 14px; border-bottom: 1px solid var(--border); }
+.receipt-row:last-child { border-bottom: none; }
+.receipt-row span:first-child { color: var(--text-secondary); }
+.myqr-content { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+.qr-box { background: white; padding: 24px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 24px; }
+.fake-qr { width: 200px; height: 200px; background: linear-gradient(45deg, #111 25%, transparent 25%), linear-gradient(-45deg, #111 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #111 75%), linear-gradient(-45deg, transparent 75%, #111 75%); background-size: 20px 20px; background-position: 0 0, 0 10px, 10px -10px, -10px 0px; border-radius: 8px; position: relative; }
+.fake-qr::before { content: ''; position: absolute; inset: 40px; background: white; border-radius: 4px; }
+.fake-qr::after { content: 'Kaspi'; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 18px; color: var(--kaspi-red); z-index: 1; }
+.myqr-hint { color: var(--text-secondary); font-size: 14px; margin-bottom: 20px; text-align: center; }
+.user-info { text-align: center; }
+.user-info strong { display: block; font-size: 17px; margin-bottom: 4px; }
+.user-info span { color: var(--text-secondary); font-size: 14px; }
+@media (max-width: 420px) { body { padding: 0; background: var(--bg); } .phone-frame { width: 100%; height: 100vh; border-radius: 0; border: none; box-shadow: none; } }
   </style>
 </head>
 <body>
-<p>Loading...</p>
+  <div class="phone-frame">
+    <div class="status-bar">
+      <span class="time">12:13</span>
+      <div class="status-icons"><span>📶</span><span>🔋</span></div>
+    </div>
+    <div id="screen-scan" class="screen active">
+      <div class="header"><button class="back-btn" onclick="goHome()">←</button><h1>Kaspi QR</h1><div class="header-right"></div></div>
+      <div class="scanner-area">
+        <div id="reader" class="reader-box"></div>
+        <div class="scanner-overlay"><div class="scanner-frame"><div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div><div class="scan-line"></div></div></div>
+        <p class="scan-hint" id="scan-hint">Наведите камеру на QR-код продавца</p>
+      </div>
+      <div class="bottom-actions">
+        <button class="btn-secondary" id="start-camera-btn" onclick="startCamera()"><span class="icon">📷</span> Включить камеру</button>
+        <button class="btn-secondary outline" onclick="simulateScan()">Симулировать сканирование</button>
+        <button class="btn-link" onclick="showMyQR()">Мой QR</button>
+      </div>
+    </div>
+    <div id="screen-amount" class="screen">
+      <div class="header"><button class="back-btn" onclick="backToScan()">←</button><h1>Оплата</h1><div class="header-right"></div></div>
+      <div class="merchant-info"><div class="merchant-avatar">🏪</div><div class="merchant-details"><div class="merchant-name" id="merchant-name">Coffee House Almaty</div><div class="merchant-id">Kaspi QR • ID 4829103</div></div></div>
+      <div class="amount-section"><label>Сумма к оплате</label><div class="amount-input-wrap"><input type="text" id="amount-input" inputmode="decimal" placeholder="0" value="" autocomplete="off"><span class="currency">₸</span></div>
+        <div class="quick-amounts"><button onclick="setAmount(500)">500 ₸</button><button onclick="setAmount(1000)">1 000 ₸</button><button onclick="setAmount(2000)">2 000 ₸</button><button onclick="setAmount(5000)">5 000 ₸</button></div></div>
+      <div class="payment-source"><div class="source-card"><div class="card-icon">💳</div><div class="card-info"><div class="card-name">Kaspi Gold</div><div class="card-balance">Баланс: 245 780 ₸</div></div><div class="card-check">✓</div></div></div>
+      <div class="bottom-fixed"><button class="btn-primary" id="pay-btn" onclick="goToConfirm()" disabled>Продолжить</button></div>
+    </div>
+    <div id="screen-confirm" class="screen">
+      <div class="header"><button class="back-btn" onclick="showScreen('screen-amount')">←</button><h1>Подтверждение</h1><div class="header-right"></div></div>
+      <div class="confirm-content"><div class="confirm-amount" id="confirm-amount">0 ₸</div><div class="confirm-merchant"><span>Получатель</span><strong id="confirm-merchant-name">Coffee House Almaty</strong></div>
+        <div class="confirm-details"><div class="detail-row"><span>Счёт списания</span><span>Kaspi Gold •••• 4829</span></div><div class="detail-row"><span>Комиссия</span><span class="free">0 ₸</span></div></div></div>
+      <div class="bottom-fixed"><button class="btn-primary" onclick="processPayment()">Оплатить</button></div>
+    </div>
+    <div id="screen-success" class="screen">
+      <div class="success-content"><div class="success-icon"><svg viewBox="0 0 80 80" fill="none"><circle cx="40" cy="40" r="38" stroke="#22C55E" stroke-width="4"/><path d="M24 40 L35 51 L56 30" stroke="#22C55E" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <h2>Оплата прошла успешно</h2><div class="success-amount" id="success-amount">0 ₸</div><div class="success-merchant" id="success-merchant">Coffee House Almaty</div><div class="success-time" id="success-time"></div>
+        <div class="receipt-card"><div class="receipt-row"><span>Номер операции</span><span id="op-number">KS-48291037</span></div><div class="receipt-row"><span>Счёт</span><span>Kaspi Gold</span></div></div></div>
+      <div class="bottom-fixed"><button class="btn-primary" onclick="goHome()">Готово</button><button class="btn-secondary outline" onclick="showReceipt()">Чек</button></div>
+    </div>
+    <div id="screen-myqr" class="screen">
+      <div class="header"><button class="back-btn" onclick="showScreen('screen-scan')">←</button><h1>Мой QR</h1><div class="header-right"></div></div>
+      <div class="myqr-content"><div class="qr-box"><div class="fake-qr"></div></div><p class="myqr-hint">Покажите этот QR-код, чтобы получить перевод</p><div class="user-info"><strong>Айдар Нурланов</strong><span>+7 701 234 56 78</span></div></div>
+    </div>
+  </div>
+  <script>
+const merchants = [{ name: "Coffee House Almaty", id: "4829103" },{ name: "Magnum Cash & Carry", id: "1192847" },{ name: "Sulpak Electronics", id: "3382910" },{ name: "KFC Dostyk Plaza", id: "5510293" },{ name: "Аптека №47", id: "7740128" },{ name: "Starbucks Mega", id: "8821934" },{ name: "Zara Dostyk Plaza", id: "2291045" }];
+let currentAmount = 0; let currentMerchant = merchants[0]; let html5QrCode = null; let isScanning = false;
+function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+function goHome() { stopCamera(); document.getElementById('amount-input').value = ''; currentAmount = 0; updatePayButton(); showScreen('screen-scan'); document.getElementById('scan-hint').textContent = 'Наведите камеру на QR-код продавца'; }
+function backToScan() { stopCamera(); showScreen('screen-scan'); }
+function onScanSuccess(decodedText) { stopCamera(); currentMerchant = merchants[Math.floor(Math.random() * merchants.length)]; document.getElementById('merchant-name').textContent = currentMerchant.name; document.getElementById('confirm-merchant-name').textContent = currentMerchant.name; document.getElementById('success-merchant').textContent = currentMerchant.name; const frame = document.querySelector('.scanner-frame'); if (frame) frame.style.boxShadow = '0 0 0 4px rgba(34, 197, 94, 0.6)'; setTimeout(() => { if (frame) frame.style.boxShadow = ''; showScreen('screen-amount'); document.getElementById('amount-input').focus(); }, 300); }
+function startCamera() { if (isScanning) return; const btn = document.getElementById('start-camera-btn'); btn.textContent = 'Запуск камеры...'; btn.disabled = true; html5QrCode = new Html5Qrcode("reader"); html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 240, height: 240 }, aspectRatio: 1.0 }, onScanSuccess, () => {}).then(() => { isScanning = true; btn.innerHTML = '<span class="icon">📷</span> Камера включена'; btn.disabled = true; document.getElementById('scan-hint').textContent = 'Наведите на QR-код...'; }).catch((err) => { console.error(err); btn.innerHTML = '<span class="icon">📷</span> Включить камеру'; btn.disabled = false; document.getElementById('scan-hint').textContent = 'Нет доступа к камере. Используйте симуляцию.'; alert('Не удалось получить доступ к камере. Разрешите доступ или используйте «Симулировать».'); }); }
+function stopCamera() { if (html5QrCode && isScanning) { html5QrCode.stop().then(() => { html5QrCode.clear(); isScanning = false; const btn = document.getElementById('start-camera-btn'); if (btn) { btn.innerHTML = '<span class="icon">📷</span> Включить камеру'; btn.disabled = false; } }).catch(() => { isScanning = false; }); } }
+function simulateScan() { stopCamera(); currentMerchant = merchants[Math.floor(Math.random() * merchants.length)]; document.getElementById('merchant-name').textContent = currentMerchant.name; document.getElementById('confirm-merchant-name').textContent = currentMerchant.name; document.getElementById('success-merchant').textContent = currentMerchant.name; const frame = document.querySelector('.scanner-frame'); if (frame) frame.style.boxShadow = '0 0 0 4px rgba(227, 30, 36, 0.5)'; setTimeout(() => { if (frame) frame.style.boxShadow = ''; showScreen('screen-amount'); document.getElementById('amount-input').focus(); }, 400); }
+function showMyQR() { stopCamera(); showScreen('screen-myqr'); }
+function setAmount(val) { document.getElementById('amount-input').value = val.toLocaleString('ru-RU'); currentAmount = val; updatePayButton(); }
+function formatNumber(num) { return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' '); }
+const amountInput = document.getElementById('amount-input');
+amountInput.addEventListener('input', (e) => { let raw = e.target.value.replace(/[^\d]/g, ''); if (raw === '') { e.target.value = ''; currentAmount = 0; } else { currentAmount = parseInt(raw, 10); e.target.value = formatNumber(currentAmount); } updatePayButton(); });
+function updatePayButton() { document.getElementById('pay-btn').disabled = currentAmount <= 0; }
+function goToConfirm() { if (currentAmount <= 0) return; document.getElementById('confirm-amount').textContent = formatNumber(currentAmount) + ' ₸'; showScreen('screen-confirm'); }
+function processPayment() { const btn = document.querySelector('#screen-confirm .btn-primary'); const originalText = btn.textContent; btn.textContent = 'Обработка...'; btn.disabled = true; setTimeout(() => { document.getElementById('success-amount').textContent = formatNumber(currentAmount) + ' ₸'; const now = new Date(); document.getElementById('success-time').textContent = now.toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }); document.getElementById('op-number').textContent = 'KS-' + Math.floor(10000000 + Math.random() * 90000000); btn.textContent = originalText; btn.disabled = false; showScreen('screen-success'); }, 900); }
+function showReceipt() { alert('Чек отправлен\n\nОперация: ' + document.getElementById('op-number').textContent + '\nСумма: ' + formatNumber(currentAmount) + ' ₸\nПолучатель: ' + currentMerchant.name); }
+function updateTime() { const now = new Date(); document.querySelector('.time').textContent = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0'); }
+updateTime(); setInterval(updateTime, 30000);
+  </script>
 </body>
 </html>
